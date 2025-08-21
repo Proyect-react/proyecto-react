@@ -37,7 +37,7 @@ const Login = () => {
           required
         />
         {error && <p style={styles.error}>{error}</p>}
-        <button type="submit" style={styles.button}>Ingresar</button>
+        <button to="/" type="submit" style={styles.button}>Ingresar</button>
       </form>
     </div>
   );
