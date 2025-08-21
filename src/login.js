@@ -1,7 +1,6 @@
-// Login.jsx
 import React, { useState } from 'react';
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -11,6 +10,7 @@ const Login = () => {
     if (email === 'admin@12345.com' && password === '12345') {
       alert('Login exitoso!');
       setError('');
+      onLogin(); // ← LÍNEA AGREGADA
     } else {
       setError('Usuario o contraseña incorrectos');
     }
@@ -49,7 +49,7 @@ const styles = {
     height: '100vh',
     justifyContent: 'center',
     alignItems: 'center',
-    background: '#f0f2f5', // Fondo suave
+    background: '#f0f2f5',
   },
   form: {
     display: 'flex',
@@ -57,7 +57,7 @@ const styles = {
     padding: '70px 30px',
     borderRadius: '20px',
     background: '#ffffff',
-    boxShadow: '0 15px 35px rgba(0,0,0,0.15)', // sombra más elegante
+    boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
     width: '350px',
     transition: 'all 0.3s ease',
   },
@@ -91,23 +91,6 @@ const styles = {
     color: 'red',
     marginBottom: '12px',
     textAlign: 'center',
-  },
-};
-
-// Añadir efecto focus en inputs
-styles.input = {
-  ...styles.input,
-  ':focus': {
-    borderColor: '#007bff',
-    boxShadow: '0 0 5px rgba(0, 123, 255, 0.5)',
-  },
-};
-
-// Añadir efecto hover en botón
-styles.button = {
-  ...styles.button,
-  ':hover': {
-    background: '#0056b3',
   },
 };
 
