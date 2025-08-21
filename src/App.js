@@ -1,16 +1,29 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./Componentes/login"; // Asegúrate de que la ruta sea correcta
-import Inicio from "./Componentes/Inicio"; // Asegúrate de que la ruta sea correcta 
+import React, { useState } from 'react';
+import Login from './login';
+import Dashboard from './components/Dashboard/Dashboard';
+import './App.css';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Función para manejar login exitoso
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/inicio" element={<Inicio />} />
-      </Routes>
-    </Router>
+    <div className="App">
+      {isAuthenticated ? (
+        <Dashboard onLogout={handleLogout} />
+      ) : (
+        <Login onLogin={handleLogin} />
+      )}
+    </div>
   );
 }
 
