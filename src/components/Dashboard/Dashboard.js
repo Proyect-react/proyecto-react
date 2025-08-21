@@ -1,27 +1,115 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Doughnut, Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import './Dashboard.css';
 
+// Registramos los componentes necesarios de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 const Dashboard = ({ onLogout }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Datos de ejemplo
   const statsData = [
-    { title: "Comitada Total Veracésica", value: "15", subtitle: "7" },
-    { title: "Total Computatoria", value: "5/1498.70" },
-    { title: "Total Ventas del Día", value: "5/1291.70" },
-    { title: "Comunidades del Día", value: "5/291.70" },
-    { title: "Mínima de Comunidades", value: "58.49%" }
+    { title: "Cantidad Total Vendida", value: "15" },
+    { title: "Total Comprobantes", value: "S/1498.70" },
+    { title: "Total Ventas del Día", value: "S/1291.70" },
+    { title: "Ganancia Total del Día", value: "S/291.70" },
+    { title: "Margen de Ganancia", value: "58.49%" }
   ];
 
-  const chartData = [
-    { label: "Categoría A", value: 120 },
-    { label: "Categoría B", value: 90 },
-    { label: "Categoría C", value: 60 },
-    { label: "Categoría D", value: 30 }
-  ];
+  // Datos para el gráfico de pastel (Ganancias por Categoría)
+  const chartData = {
+    labels: ["Categoría A", "Categoría B", "Categoría C", "Categoría D"],
+    datasets: [
+      {
+        data: [120, 90, 60, 30],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+        borderWidth: 0,
+      },
+    ],
+  };
 
-  const paymentData = [
-    { label: "Contado (PA)", value: 65 },
-    { label: "Crédito (PA)", value: 35 }
-  ];
+  const doughnutOptions = {
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 15,
+          padding: 15,
+        },
+      },
+    },
+    cutout: '70%',
+    maintainAspectRatio: false,
+  };
+
+  // Datos para el gráfico de líneas (Ventas por Condición de Pago)
+  const lineData = {
+    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+    datasets: [
+      {
+        label: 'Contado (PA)',
+        data: [65, 59, 80, 81, 56, 55],
+        fill: false,
+        backgroundColor: '#36A2EB',
+        borderColor: '#36A2EB',
+        tension: 0.1,
+      },
+      {
+        label: 'Crédito (PA)',
+        data: [35, 40, 30, 35, 25, 30],
+        fill: false,
+        backgroundColor: '#FF6384',
+        borderColor: '#FF6384',
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const lineOptions = {
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 15,
+          padding: 15,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          callback: function(value) {
+            return value + '%';
+          },
+        },
+      },
+    },
+    maintainAspectRatio: false,
+  };
 
   const transactionsData = [
     { id: 1, description: "Venta 1", amount: "150.00", condition: "Contado" },
@@ -29,36 +117,11 @@ const Dashboard = ({ onLogout }) => {
     { id: 3, description: "Venta 3", amount: "75.30", condition: "Contado" }
   ];
 
-  // Componente para barras de gráfico
-  const ChartBar = ({ label, value, maxValue }) => {
-    const percentage = (value / maxValue) * 100;
-    
-    return (
-      <div className="chart-bar">
-        <div className="chart-bar-label">{label}</div>
-        <div className="chart-bar-container">
-          <div 
-            className="chart-bar-fill" 
-            style={{ width: `${percentage}%` }}
-          ></div>
-        </div>
-        <div className="chart-bar-value">{value}</div>
-      </div>
-    );
-  };
-
-  // Componente para condiciones de pago
-  const PaymentCondition = ({ label, value }) => (
-    <div className="payment-condition">
-      <span className="payment-label">{label}</span>
-      <span className="payment-value">{value}%</span>
-      <div className="payment-bar">
-        <div 
-          className="payment-bar-fill" 
-          style={{ width: `${value}%` }}
-        ></div>
-      </div>
-    </div>
+  // Filtrar transacciones basado en la búsqueda
+  const filteredTransactions = transactionsData.filter(transaction =>
+    transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    transaction.amount.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    transaction.condition.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Componente para ítems de transacción
@@ -73,8 +136,22 @@ const Dashboard = ({ onLogout }) => {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>Instituto Social Veracésico</h1>
-        <button onClick={onLogout} className="logout-btn">Cerrar Sesión</button>
+        <div className="header-center">
+          <h1>Registro de Ventas</h1>
+        </div>
+        <div className="header-right">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Buscar transacciones..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+          <button onClick={onLogout} className="logout-btn">Cerrar Sesión</button>
+        </div>
       </header>
       
       <div className="dashboard-content">
@@ -90,37 +167,29 @@ const Dashboard = ({ onLogout }) => {
         
         <div className="charts-grid">
           <div className="chart-card">
-            <h2>Garanzías por Categoría</h2>
-            <div className="chart-bars">
-              {chartData.map((item, index) => (
-                <ChartBar 
-                  key={index}
-                  label={item.label}
-                  value={item.value}
-                  maxValue={120}
-                />
-              ))}
+            <h2>Ganancias por Categoría</h2>
+            <div className="chart-container">
+              <Doughnut data={chartData} options={doughnutOptions} />
             </div>
           </div>
           
           <div className="chart-card">
             <h2>Ventas por Condición de Pago</h2>
-            <div className="payment-conditions">
-              {paymentData.map((item, index) => (
-                <PaymentCondition 
-                  key={index}
-                  label={item.label}
-                  value={item.value}
-                />
-              ))}
+            <div className="chart-container">
+              <Line data={lineData} options={lineOptions} />
             </div>
           </div>
         </div>
         
         <div className="transactions-card">
-          <h2>Listado de Transacciones del Día ({new Date().toLocaleDateString()})</h2>
+          <div className="transactions-header">
+            <h2>Listado de Transacciones del Día ({new Date().toLocaleDateString()})</h2>
+            <div className="transactions-count">
+              {filteredTransactions.length} transacciones
+            </div>
+          </div>
           <div className="transactions-list">
-            {transactionsData.map(transaction => (
+            {filteredTransactions.map(transaction => (
               <TransactionItem key={transaction.id} transaction={transaction} />
             ))}
           </div>
