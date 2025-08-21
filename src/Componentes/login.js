@@ -1,16 +1,18 @@
 // Login.jsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (email === 'admin@12345.com' && password === '12345') {
-      alert('Login exitoso!');
       setError('');
+      navigate('/inicio'); // 👈 Redirige a Inicio.jsx
     } else {
       setError('Usuario o contraseña incorrectos');
     }
@@ -37,11 +39,12 @@ const Login = () => {
           required
         />
         {error && <p style={styles.error}>{error}</p>}
-        <button to="/" type="submit" style={styles.button}>Ingresar</button>
+        <button type="submit" style={styles.button}>Ingresar</button>
       </form>
     </div>
   );
 };
+
 
 const styles = {
   container: {
