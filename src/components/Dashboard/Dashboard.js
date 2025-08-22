@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Doughnut, Line } from 'react-chartjs-2';
+import Papa from 'papaparse';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,123 +28,123 @@ ChartJS.register(
 
 const Dashboard = ({ onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [ventas, setVentas] = useState([]);
 
-  // Datos de ejemplo
+  // Cargar CSV al montar el componente
+  useEffect(() => {
+    Papa.parse('/ventas.csv', {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      complete: (result) => {
+        setVentas(result.data);
+      },
+    });
+  }, []);
+
+  // ---- Filtro dinámico ----
+  const hoy = new Date();
+  const hoyStr = hoy.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" }); 
+  let datosFiltrados = [];
+
+  if (searchTerm.trim() !== "") {
+    datosFiltrados = ventas.filter(v =>
+      (v.Producto || "").toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  } else {
+    datosFiltrados = ventas.filter(v => v.Fecha === hoyStr);
+  }
+
+  // ---- Stats según filtro ----
+  const cantidadTotalVendida = datosFiltrados.reduce((acc, v) => acc + (v.Cantidad || 0), 0);
+  const totalComprobantes = datosFiltrados.length;
+  const totalVentasDia = datosFiltrados.reduce((acc, v) => acc + (v.Total || 0), 0);
+  const gananciaNetaDia = datosFiltrados.reduce((acc, v) => acc + ((v.Total || 0) - (v.Costo || 0)), 0);
+  const margenGanancia = totalVentasDia > 0 ? (gananciaNetaDia / totalVentasDia) * 100 : 0;
+
   const statsData = [
-    { title: "Cantidad Total Vendida", value: "15" },
-    { title: "Total Comprobantes", value: "S/1498.70" },
-    { title: "Total Ventas del Día", value: "S/1291.70" },
-    { title: "Ganancia Total del Día", value: "S/291.70" },
-    { title: "Margen de Ganancia", value: "58.49%" }
+    { title: "Cantidad Total Vendida", value: cantidadTotalVendida },
+    { title: "Total Comprobantes", value: totalComprobantes },
+    { title: "Total Ventas", value: `S/${totalVentasDia.toFixed(2)}` },
+    { title: "Ganancia Neta", value: `S/${gananciaNetaDia.toFixed(2)}` },
+    { title: "Margen de Ganancia", value: `${margenGanancia.toFixed(2)}%` },
   ];
-
-  // Datos para el gráfico de pastel (Ganancias por Categoría)
+  // ---- Gráfico de pastel (ventas por categoría según filtro) ----
+  const categoriaMap = {};
+  datosFiltrados.forEach(v => {
+    if (!v.Categoría) return;
+    categoriaMap[v.Categoría] = (categoriaMap[v.Categoría] || 0) + v.Total;
+  });
   const chartData = {
-    labels: ["Categoría A", "Categoría B", "Categoría C", "Categoría D"],
+    labels: Object.keys(categoriaMap),
     datasets: [
       {
-        data: [120, 90, 60, 30],
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+        data: Object.values(categoriaMap),
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
         borderWidth: 0,
       },
     ],
   };
-
   const doughnutOptions = {
     plugins: {
       legend: {
         position: 'bottom',
-        labels: {
-          boxWidth: 15,
-          padding: 15,
-        },
+        labels: { boxWidth: 15, padding: 15 },
       },
     },
     cutout: '70%',
     maintainAspectRatio: false,
   };
 
-  // Datos para el gráfico de líneas (Ventas por Condición de Pago)
+  // ---- Gráfico de líneas (ventas por mes según filtro) ----
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const pagoData = {};
+  datosFiltrados.forEach(v => {
+    if (!v.Fecha || !v.Total) return;
+    const [dia, mes, anio] = v.Fecha.split("/");
+    const mesIdx = parseInt(mes, 10) - 1;
+    const metodo = v.Pago || "Otro";
+    if (!pagoData[metodo]) pagoData[metodo] = Array(12).fill(0);
+    pagoData[metodo][mesIdx] += v.Total;
+  });
   const lineData = {
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Contado (PA)',
-        data: [65, 59, 80, 81, 56, 55],
-        fill: false,
-        backgroundColor: '#36A2EB',
-        borderColor: '#36A2EB',
-        tension: 0.1,
-      },
-      {
-        label: 'Crédito (PA)',
-        data: [35, 40, 30, 35, 25, 30],
-        fill: false,
-        backgroundColor: '#FF6384',
-        borderColor: '#FF6384',
-        tension: 0.1,
-      },
-    ],
+    labels: meses,
+    datasets: Object.keys(pagoData).map((metodo, idx) => ({
+      label: metodo,
+      data: pagoData[metodo],
+      fill: false,
+      borderColor: ['#36A2EB','#FF6384','#4BC0C0','#9966FF'][idx % 4],
+      tension: 0.1,
+    })),
   };
-
   const lineOptions = {
     plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          boxWidth: 15,
-          padding: 15,
-        },
-      },
+      legend: { position: 'bottom', labels: { boxWidth: 15, padding: 15 } },
     },
     scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        ticks: {
-          callback: function(value) {
-            return value + '%';
-          },
-        },
-      },
+      y: { beginAtZero: true },
     },
     maintainAspectRatio: false,
   };
-
-  const transactionsData = [
-    { id: 1, description: "Venta 1", amount: "150.00", condition: "Contado" },
-    { id: 2, description: "Venta 2", amount: "200.50", condition: "Crédito" },
-    { id: 3, description: "Venta 3", amount: "75.30", condition: "Contado" }
-  ];
-
-  // Filtrar transacciones basado en la búsqueda
-  const filteredTransactions = transactionsData.filter(transaction =>
-    transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.amount.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.condition.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Componente para ítems de transacción
+  // ---- Transacciones (muestran lo filtrado) ----
   const TransactionItem = ({ transaction }) => (
     <div className="transaction-item">
-      <div className="transaction-desc">{transaction.description}</div>
-      <div className="transaction-amount">{transaction.amount}</div>
-      <div className="transaction-condition">{transaction.condition}</div>
+      <div className="transaction-desc">{transaction.Producto}</div>
+      <div className="transaction-amount">S/{transaction.Total}</div>
+      <div className="transaction-condition">{transaction.Pago}</div>
     </div>
   );
-
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <div className="header-center">
-          <h1>Registro de Ventas</h1>
-        </div>
+        {/* Título centrado */}
+        <h1 style={{ flex: 1, textAlign: "center" }}>Registro de Ventas</h1>
+
         <div className="header-right">
           <div className="search-container">
             <input
               type="text"
-              placeholder="Buscar transacciones..."
+              placeholder="Buscar producto..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -153,28 +154,26 @@ const Dashboard = ({ onLogout }) => {
           <button onClick={onLogout} className="logout-btn">Cerrar Sesión</button>
         </div>
       </header>
-      
       <div className="dashboard-content">
         <div className="stats-grid">
           {statsData.map((stat, index) => (
             <div key={index} className="stat-card">
               <h3>{stat.title}</h3>
               <div className="stat-value">{stat.value}</div>
-              {stat.subtitle && <div className="stat-subtitle">{stat.subtitle}</div>}
             </div>
           ))}
         </div>
         
         <div className="charts-grid">
           <div className="chart-card">
-            <h2>Ganancias por Categoría</h2>
+            <h2>Ventas por Categoría</h2>
             <div className="chart-container">
               <Doughnut data={chartData} options={doughnutOptions} />
             </div>
           </div>
           
           <div className="chart-card">
-            <h2>Ventas por Condición de Pago</h2>
+            <h2>Ventas por Método de Pago</h2>
             <div className="chart-container">
               <Line data={lineData} options={lineOptions} />
             </div>
@@ -183,14 +182,14 @@ const Dashboard = ({ onLogout }) => {
         
         <div className="transactions-card">
           <div className="transactions-header">
-            <h2>Listado de Transacciones del Día ({new Date().toLocaleDateString()})</h2>
+            <h2>Listado ({searchTerm ? `Filtro: ${searchTerm}` : `Hoy: ${hoyStr}`})</h2>
             <div className="transactions-count">
-              {filteredTransactions.length} transacciones
+              {datosFiltrados.length} transacciones
             </div>
           </div>
           <div className="transactions-list">
-            {filteredTransactions.map(transaction => (
-              <TransactionItem key={transaction.id} transaction={transaction} />
+            {datosFiltrados.map((transaction, idx) => (
+              <TransactionItem key={idx} transaction={transaction} />
             ))}
           </div>
         </div>
