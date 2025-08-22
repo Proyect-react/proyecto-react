@@ -44,7 +44,7 @@ const Dashboard = ({ onLogout }) => {
 
   // ---- Filtro dinámico ----
   const hoy = new Date();
-  const hoyStr = hoy.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" }); 
+  const hoyStr = hoy.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
   let datosFiltrados = [];
 
   if (searchTerm.trim() !== "") {
@@ -52,7 +52,7 @@ const Dashboard = ({ onLogout }) => {
       (v.Producto || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
   } else {
-    datosFiltrados = ventas.filter(v => v.Fecha === hoyStr);
+    datosFiltrados = ventas;
   }
 
   // ---- Stats según filtro ----
@@ -97,7 +97,7 @@ const Dashboard = ({ onLogout }) => {
   };
 
   // ---- Gráfico de líneas (ventas por mes según filtro) ----
-  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
   const pagoData = {};
   datosFiltrados.forEach(v => {
     if (!v.Fecha || !v.Total) return;
@@ -113,7 +113,7 @@ const Dashboard = ({ onLogout }) => {
       label: metodo,
       data: pagoData[metodo],
       fill: false,
-      borderColor: ['#36A2EB','#FF6384','#4BC0C0','#9966FF'][idx % 4],
+      borderColor: ['#36A2EB', '#FF6384', '#4BC0C0', '#9966FF'][idx % 4],
       tension: 0.1,
     })),
   };
@@ -163,7 +163,7 @@ const Dashboard = ({ onLogout }) => {
             </div>
           ))}
         </div>
-        
+
         <div className="charts-grid">
           <div className="chart-card">
             <h2>Ventas por Categoría</h2>
@@ -171,7 +171,7 @@ const Dashboard = ({ onLogout }) => {
               <Doughnut data={chartData} options={doughnutOptions} />
             </div>
           </div>
-          
+
           <div className="chart-card">
             <h2>Ventas por Método de Pago</h2>
             <div className="chart-container">
@@ -179,10 +179,14 @@ const Dashboard = ({ onLogout }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="transactions-card">
           <div className="transactions-header">
-            <h2>Listado ({searchTerm ? `Filtro: ${searchTerm}` : `Hoy: ${hoyStr}`})</h2>
+            <h2>
+              Listado (
+              {searchTerm ? `Filtro: ${searchTerm}` : "Todas las ventas"}
+              )
+            </h2>
             <div className="transactions-count">
               {datosFiltrados.length} transacciones
             </div>
