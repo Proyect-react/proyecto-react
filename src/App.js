@@ -5,6 +5,7 @@ import Barra from "./components/Barra/Barra";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Graficos from "./components/Graficos/Graficos";
 import Predicciones from "./components/Predicciones/Predicciones";
+import Login from "./components/Login/Login";
 
 function App() {
   const handleLogout = () => {
@@ -23,7 +24,8 @@ function App() {
       <div style={{ marginLeft: "220px", paddingTop: "4.3rem" }}>
         {/* Ajuste de margen para que el contenido no quede debajo de la barra y el header */}
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/graficos" element={<Graficos />} />
           <Route path="/predicciones" element={<Predicciones />} />
         </Routes>
