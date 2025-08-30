@@ -1,33 +1,44 @@
 // App.js
-import React from "react";
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import Barra from "./components/Barra/Barra";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Graficos from "./components/Graficos/Graficos";
 import Predicciones from "./components/Predicciones/Predicciones";
 import Login from "./components/Login/Login";
+import "./App.css";
 
 function App() {
-  const handleLogout = () => {
-    console.log("Cerrar sesión");
-    // Aquí tu lógica de logout
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Verificar si hay una sesión activa al cargar la aplicación
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isAuthenticated');
+    if (loggedIn === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    localStorage.setItem('isAuthenticated', 'true');
   };
 
-  const irAGraficos = () => {
-    console.log("Ir a gráficos desde Barra");
-    // Lógica adicional si quieres manejar navegación especial
+  const handleLogout = () => {
+    console.log("Cerrar sesión");
+    setIsAuthenticated(false);
+    localStorage.removeItem('isAuthenticated');
   };
 
   return (
     <BrowserRouter>
-      <Barra onLogout={handleLogout} irAGraficos={irAGraficos} />
-      <div style={{ marginLeft: "220px", paddingTop: "4.3rem" }}>
-        {/* Ajuste de margen para que el contenido no quede debajo de la barra y el header */}
+      {isAuthenticated && <Barra onLogout={handleLogout} />}
+      <div style={{ marginLeft: isAuthenticated ? "220px" : "0", paddingTop: isAuthenticated ? "4.3rem" : "0" }}>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="/graficos" element={<Graficos />} />
-          <Route path="/predicciones" element={<Predicciones />} />
+          <Route path="/" element={isAuthenticated ? <Dashboard /> : <Login onLogin={handleLogin} />} />
+          <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />} />
+          <Route path="/graficos" element={isAuthenticated ? <Graficos /> : <Navigate to="/" />} />
+          <Route path="/predicciones" element={isAuthenticated ? <Predicciones /> : <Navigate to="/" />} />
         </Routes>
       </div>
     </BrowserRouter>

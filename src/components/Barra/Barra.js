@@ -1,31 +1,21 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "./Barra.css"; // Asegúrate de tener los estilos adecuados
+import "./Barra.css";
 
-const Barra = ({ onLogout, irAGraficos }) => {
+const Barra = ({ onLogout }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   // Función para manejar la navegación de los botones
   const handleNavegacion = (ruta) => {
-    if (ruta === "/dashboard" || ruta === "/") {
-      navigate("/"); // Productos
-    } else if (ruta === "/graficos") {
-      if (irAGraficos) {
-        irAGraficos();
-      } else {
-        navigate("/graficos");
-      }
-    } else if (ruta === "/predicciones") {
-      navigate("/predicciones");
-    }
+    navigate(ruta);
   };
 
   return (
     <div className="barra">
       <button
-        className={`barra-btn${location.pathname === "/" ? " active" : ""}`}
-        onClick={() => handleNavegacion("/")}
+        className={`barra-btn${location.pathname === "/dashboard" ? " active" : ""}`}
+        onClick={() => handleNavegacion("/dashboard")}
       >
         Productos
       </button>
