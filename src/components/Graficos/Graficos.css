@@ -1,111 +1,270 @@
-/* ---------------------- Graficos.css ---------------------- */
+/* ---------------------- Graficos.css (Versión compacta pero con gráficos y cards un poco más grandes) ---------------------- */
 
-/* Fondo general igual al Dashboard */
-.graficos {
-  min-height: 100vh;
-  background-color: #f8fafc;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Filtros (selects) estilo igual a "Todas las categorías" */
+.search-select,
+.filter-container select {
+  background: rgba(255,255,255,0.13);
+  color: #e0e7ff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 1em;
+  margin-right: 0.5em;
+  outline: none;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  appearance: none;
+  min-width: 120px;
+  font-weight: 500;
 }
 
+.search-select:focus,
+.filter-container select:focus {
+  background: rgba(129,230,217,0.18);
+  color: #81e6d9;
+}
+
+.search-select option,
+.filter-container select option {
+  background: #232946;
+  color: #e0e7ff;
+  font-weight: 500;
+}
+
+/* Contenedor del icono de búsqueda */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  right: 12px;
+  color: #81e6d9;
+  pointer-events: none;
+  font-size: 1.1em;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Contenedor principal para estadísticas y gráficos */
+.stats-charts-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.stats-charts-container h2 {
+  color: #ffffff;
+  margin-bottom: 10px;
+  font-size: 1.5em;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Cuadrícula para las tarjetas de estadísticas */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Cuadrícula para los gráficos principales */
+.charts-grid {
+  display: grid;
+  grid-template-areas: 
+    "productos-mas-vendidos metodo-pago"
+    "productos-mas-vendidos ventas-mensuales";
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  box-sizing: border-box;
+}
+
+/* Asignar áreas a cada tarjeta de gráfico */
+.chart-card.productos-mas-vendidos {
+  grid-area: productos-mas-vendidos;
+}
+.chart-card.metodo-pago {
+  grid-area: metodo-pago;
+}
+.chart-card.ventas-mensuales {
+  grid-area: ventas-mensuales;
+}
+
+/* Tarjetas de estadísticas y gráficos */
+.stat-card,
+.chart-card {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 18px 14px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #e0e7ff;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.stat-card h3,
+.chart-card h2 {
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.05em;
+  font-weight: bold;
+}
+
+/* Valor numérico destacado */
+.stat-value {
+  font-size: 1.4em;
+  font-weight: bold;
+  color: #81e6d9;
+  margin-bottom: 0;
+}
+
+/* Contenedor para el área de gráficos */
+.chart-container {
+  height: 200px;
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* RESPONSIVIDAD */
+
+/* Tablets y pantallas medianas */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 98vw;
+    gap: 12px;
   }
-  
-  .stat-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f7f9fc 100%);
-    border-radius: 16px;
-    padding: 1.8rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    transition: all 0.3s ease;
-    border: 1px solid #eaeaea;
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  }
-  
-  .stat-card h3 {
-    font-size: 0.85rem;
-    color: #64748b;
-    margin-bottom: 1.2rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #4f46e5;
-    margin-bottom: 0.5rem;
-  }
-  
   .charts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2.5rem;
+    grid-template-areas: 
+      "productos-mas-vendidos"
+      "metodo-pago"
+      "ventas-mensuales";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    max-width: 98vw;
+    gap: 12px;
   }
-  
-  .chart-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f7f9fc 100%);
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #eaeaea;
-  }
-  
-  .chart-card h2 {
-    font-size: 1.3rem;
-    margin-bottom: 1.8rem;
-    color: #374151;
-    font-weight: 600;
-    border-bottom: 2px solid #eef2ff;
-    padding-bottom: 0.8rem;
-  }
-  
   .chart-container {
-    height: 300px;
-    position: relative;
+    height: 170px;
+    max-width: 98vw;
   }
-  
-  /* Responsive */
-  @media (max-width: 1024px) {
-    .charts-grid {
-      grid-template-columns: 1fr;
-    }
+}
+
+/* Tablets pequeñas y pantallas pequeñas */
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 100vw;
+    gap: 8px;
   }
-  
-  @media (max-width: 768px) {
-    .chart-card {
-      padding: 1.5rem;
-    }
-  
-    .chart-container {
-      height: 250px;
-    }
+  .charts-grid {
+    grid-template-areas: 
+      "productos-mas-vendidos"
+      "metodo-pago"
+      "ventas-mensuales";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    max-width: 100vw;
+    gap: 8px;
   }
-  
-  @media (max-width: 480px) {
-    .stat-card {
-      padding: 1.2rem;
-    }
-  
-    .stat-value {
-      font-size: 1.6rem;
-    }
-  
-    .chart-card {
-      padding: 1.2rem;
-    }
-  
-    .chart-container {
-      height: 220px;
-    }
+  .stat-card,
+  .chart-card {
+    padding: 12px 6px;
+    border-radius: 8px;
+    font-size: 13px;
   }
-  
+  .chart-container {
+    height: 120px;
+    max-width: 100vw;
+  }
+  .search-select,
+  .filter-container select {
+    font-size: 0.95em;
+    padding: 6px 10px;
+    min-width: 90px;
+  }
+}
+
+/* Móviles */
+@media (max-width: 600px) {
+  .stats-charts-container h2 {
+    font-size: 1.1em;
+    margin-bottom: 6px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    max-width: 100vw;
+  }
+  .charts-grid {
+    grid-template-areas: 
+      "productos-mas-vendidos"
+      "metodo-pago"
+      "ventas-mensuales";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 6px;
+    max-width: 100vw;
+  }
+  .stat-card,
+  .chart-card {
+    padding: 7px 3px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .stat-card h3,
+  .chart-card h2 {
+    font-size: 0.95em;
+    margin-bottom: 5px;
+  }
+  .stat-value {
+    font-size: 1.1em;
+  }
+  .chart-container {
+    height: 70px;
+    max-width: 100vw;
+  }
+  .search-select,
+  .filter-container select {
+    font-size: 0.9em;
+    padding: 5px 7px;
+    min-width: 70px;
+  }
+}
+
+/* Eliminar scrollbar en los contenedores de gráficos si hay overflow */
+.charts-grid,
+.stats-grid {
+  overflow-x: auto;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.charts-grid::-webkit-scrollbar,
+.stats-grid::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  background: transparent !important;
+}
