@@ -9,6 +9,7 @@ const FaceLoginAdvanced = ({ onLogin }) => {
   const [message, setMessage] = useState("Esperando...");
   const [prevEyeDistance, setPrevEyeDistance] = useState(null);
   const [detectedUser, setDetectedUser] = useState(null); // Nuevo estado para usuario detectado
+  const [isLoggedIn, setIsLoggedIn] = useState(() => sessionStorage.getItem("faceLoggedIn") === "true");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,6 +22,27 @@ const FaceLoginAdvanced = ({ onLogin }) => {
     };
     loadModels();
   }, []);
+
+  // Cerrar sesión automáticamente al cerrar la pestaña o recargar
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      sessionStorage.removeItem("faceLoggedIn");
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  // Si no está logueado, no permitir acceso directo al dashboard
+  useEffect(() => {
+    if (!isLoggedIn) {
+      // Si intentan acceder al dashboard sin login, redirigir al login facial
+      if (window.location.pathname === "/dashboard") {
+        navigate("/face-login");
+      }
+    }
+  }, [isLoggedIn, navigate]);
 
   const startVideo = () => {
     navigator.mediaDevices
@@ -153,6 +175,8 @@ const FaceLoginAdvanced = ({ onLogin }) => {
 
     if (found) {
       setMessage(`Inicio de sesión exitoso. Bienvenido, ${foundName} 🎉`);
+      sessionStorage.setItem("faceLoggedIn", "true");
+      setIsLoggedIn(true);
       if (onLogin) onLogin();
       // Quitar redirección automática al dashboard
       // navigate("/dashboard");
