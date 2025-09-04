@@ -3,14 +3,29 @@ import * as faceapi from "face-api.js";
 import "./FaceLoginAdvanced.css";
 import { useNavigate } from "react-router-dom";
 
-const FaceLoginAdvanced = ({ onLogin }) => {
+const FaceLogin = ({ onLogin }) => {
   const videoRef = useRef();
   const [users, setUsers] = useState(() => JSON.parse(localStorage.getItem("faceUsers")) || {});
-  const [message, setMessage] = useState("Esperando...");
-  const [prevEyeDistance, setPrevEyeDistance] = useState(null);
-  const [detectedUser, setDetectedUser] = useState(null); // Nuevo estado para usuario detectado
+  const [message, setMessage] = useState(""); // Ya no mostramos "Esperando..."
   const [isLoggedIn, setIsLoggedIn] = useState(() => sessionStorage.getItem("faceLoggedIn") === "true");
+  const [countdown, setCountdown] = useState(null);
+  const [detectedUser, setDetectedUser] = useState(null);
+  const countdownRef = useRef(null);
+  // Cambiamos esperandoRef a un ref que solo permite decir la frase UNA vez por sesión
+  const yaDijoMireCamara = useRef(false); // Para evitar repetir la voz "Por favor, mire a la cámara para iniciar sesión."
+  const yaDijoNoRegistrado = useRef(false); // Para evitar repetir la voz de no registrado
+  const yaDijoBienvenido = useRef(""); // Para evitar repetir la voz de bienvenida
   const navigate = useNavigate();
+
+  // Función para hablar usando SpeechSynthesis
+  const speak = (texto) => {
+    if ('speechSynthesis' in window) {
+      const utter = new window.SpeechSynthesisUtterance(texto);
+      utter.lang = "es-ES";
+      window.speechSynthesis.cancel(); // Detener cualquier voz anterior
+      window.speechSynthesis.speak(utter);
+    }
+  };
 
   useEffect(() => {
     const loadModels = async () => {
@@ -37,9 +52,8 @@ const FaceLoginAdvanced = ({ onLogin }) => {
   // Si no está logueado, no permitir acceso directo al dashboard
   useEffect(() => {
     if (!isLoggedIn) {
-      // Si intentan acceder al dashboard sin login, redirigir al login facial
       if (window.location.pathname === "/dashboard") {
-        navigate("/face-login");
+        navigate("/");
       }
     }
   }, [isLoggedIn, navigate]);
@@ -51,12 +65,36 @@ const FaceLoginAdvanced = ({ onLogin }) => {
       .catch(() => setMessage("Error al acceder a la cámara ❌"));
   };
 
-  const getEyeDistance = (landmarks) => {
-    const leftEye = landmarks.getLeftEye();
-    const rightEye = landmarks.getRightEye();
-    return (Math.abs(leftEye[1].y - leftEye[4].y) + Math.abs(rightEye[1].y - rightEye[4].y)) / 2;
-  };
+  // Manejar el contador y redirección automática
+  useEffect(() => {
+    if (countdown === null || detectedUser === null) {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+      return;
+    }
+    if (countdown === 0) {
+      setMessage(`Inicio de sesión exitoso. Bienvenido, ${detectedUser} 🎉`);
+      sessionStorage.setItem("faceLoggedIn", "true");
+      setIsLoggedIn(true);
+      if (onLogin) onLogin();
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+      setCountdown(null);
+      setDetectedUser(null);
+      return;
+    }
+    countdownRef.current = setTimeout(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => {
+      if (countdownRef.current) clearTimeout(countdownRef.current);
+    };
+  }, [countdown, detectedUser, navigate, onLogin]);
 
+  // Detección facial automática
   const detectFace = async () => {
     if (!videoRef.current) return;
     const detections = await faceapi
@@ -65,19 +103,21 @@ const FaceLoginAdvanced = ({ onLogin }) => {
       .withFaceDescriptor();
 
     if (!detections) {
-      setMessage("Esperando...");
+      // Solo decir "Por favor, mire a la cámara para iniciar sesión." UNA vez por sesión
+      if (!yaDijoMireCamara.current) {
+        speak("Por favor, mire a la cámara para iniciar sesión.");
+        yaDijoMireCamara.current = true;
+      }
+      setMessage(""); // No mostrar texto
       setDetectedUser(null);
+      setCountdown(null);
+      yaDijoNoRegistrado.current = false;
+      yaDijoBienvenido.current = "";
       return;
     }
 
-    // Liveness check
-    const eyeDist = getEyeDistance(detections.landmarks);
-    if (prevEyeDistance !== null && Math.abs(eyeDist - prevEyeDistance) < 0.5) {
-      setMessage("No se permiten fotos ❌, mueve tu cabeza o parpadea");
-      setDetectedUser(null);
-      return;
-    }
-    setPrevEyeDistance(eyeDist);
+    // Si detecta rostro, permitimos que vuelva a decir la frase si se recarga la página, pero no en la misma sesión
+    // yaDijoMireCamara.current no se reinicia aquí
 
     const descriptor = detections.descriptor;
 
@@ -94,11 +134,29 @@ const FaceLoginAdvanced = ({ onLogin }) => {
     }
 
     if (found) {
-      setMessage(`Bienvenido, ${foundName} 🎉`);
-      setDetectedUser(foundName);
+      setMessage(`Usuario detectado: ${foundName} ✅\nRedirigiendo en ${countdown !== null ? countdown : 3} segundos...`);
+      if (detectedUser !== foundName) {
+        setDetectedUser(foundName);
+        setCountdown(3);
+        // Decir "Bienvenido, <nombre>" solo una vez por usuario detectado
+        if (yaDijoBienvenido.current !== foundName) {
+          speak(`Bienvenido, ${foundName}`);
+          yaDijoBienvenido.current = foundName;
+        }
+      } else if (countdown === null) {
+        setCountdown(3);
+      }
+      yaDijoNoRegistrado.current = false; // Reiniciar para el caso de no registrado
     } else {
-      setMessage("Usuario no registrado ❌. Puedes registrarte.");
+      setMessage("Usuario no registrado ❌");
       setDetectedUser(null);
+      setCountdown(null);
+      // Decir "Usuario no registrado" solo una vez hasta que cambie el estado
+      if (!yaDijoNoRegistrado.current) {
+        speak("Usuario no registrado");
+        yaDijoNoRegistrado.current = true;
+      }
+      yaDijoBienvenido.current = "";
     }
   };
 
@@ -106,113 +164,23 @@ const FaceLoginAdvanced = ({ onLogin }) => {
   useEffect(() => {
     const interval = setInterval(detectFace, 1000);
     return () => clearInterval(interval);
-  }, [users, prevEyeDistance]);
-
-  // Función para registrar nuevo usuario
-  const handleRegister = async (userName) => {
-    if (!videoRef.current) return;
-
-    const detections = await faceapi
-      .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptor();
-
-    if (!detections) {
-      setMessage("No se detectó rostro ❌");
-      return;
-    }
-
-    const descriptor = detections.descriptor;
-
-    // Verificar si ya está registrado
-    for (const savedDescriptor of Object.values(users)) {
-      const distance = faceapi.euclideanDistance(descriptor, new Float32Array(savedDescriptor));
-      if (distance < 0.5) {
-        setMessage("Usuario ya registrado ❌");
-        return;
-      }
-    }
-
-    const updatedUsers = { ...users, [userName]: Array.from(descriptor) };
-    setUsers(updatedUsers);
-    localStorage.setItem("faceUsers", JSON.stringify(updatedUsers));
-    setMessage(`Usuario ${userName} registrado ✅`);
-  };
-
-  // Nueva función para login manual
-  const handleLogin = async () => {
-    if (!videoRef.current) return;
-    const detections = await faceapi
-      .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptor();
-
-    if (!detections) {
-      setMessage("No se detectó rostro ❌");
-      return;
-    }
-
-    // Chequeo de liveness
-    const eyeDist = getEyeDistance(detections.landmarks);
-    if (prevEyeDistance !== null && Math.abs(eyeDist - prevEyeDistance) < 0.5) {
-      setMessage("No se permiten fotos ❌, mueve tu cabeza o parpadea");
-      return;
-    }
-    setPrevEyeDistance(eyeDist);
-
-    const descriptor = detections.descriptor;
-
-    let found = false;
-    let foundName = null;
-    for (const [name, savedDescriptor] of Object.entries(users)) {
-      const distance = faceapi.euclideanDistance(descriptor, new Float32Array(savedDescriptor));
-      if (distance < 0.5) {
-        found = true;
-        foundName = name;
-        break;
-      }
-    }
-
-    if (found) {
-      setMessage(`Inicio de sesión exitoso. Bienvenido, ${foundName} 🎉`);
-      sessionStorage.setItem("faceLoggedIn", "true");
-      setIsLoggedIn(true);
-      if (onLogin) onLogin();
-      // Quitar redirección automática al dashboard
-      // navigate("/dashboard");
-    } else {
-      setMessage("Usuario no registrado ❌. Puedes registrarte.");
-    }
-  };
+  }, [users, detectedUser, countdown]);
 
   return (
     <div className="face-login-container">
       <div className="face-login-main-content">
         <video ref={videoRef} autoPlay muted className="face-login-video" />
         <div className="face-login-side-panel">
-          <h1 className="face-login-title">Login/Registro Facial Avanzado</h1>
-          <p className="face-login-message">{message}</p>
+          <h1 className="face-login-title">Login Facial</h1>
+          {/* Ya no mostramos "Esperando..." */}
+          {message && (
+            <p className="face-login-message" style={{ whiteSpace: "pre-line" }}>{message}</p>
+          )}
           <div className="face-login-input-group">
-            <input
-              type="text"
-              placeholder="Escribe tu nombre"
-              className="face-login-input"
-              id="registerName"
-            />
-            <button
-              onClick={() => handleRegister(document.getElementById("registerName").value)}
-              className="face-login-btn register"
-            >
-              Registrar
-            </button>
-            <button
-              onClick={handleLogin}
-              className="face-login-btn"
-              style={{ marginTop: "8px" }}
-              disabled={!detectedUser} // Solo habilitado si hay usuario detectado
-            >
-              Login
-            </button>
+            {/* Ya no hay botón de iniciar sesión */}
+            <p style={{ marginTop: "16px", fontSize: "14px" }}>
+              ¿No tienes cuenta? <a href="/register" style={{ color: "#4CAF50" }}>Regístrate aquí</a>
+            </p>
           </div>
         </div>
       </div>
@@ -220,4 +188,4 @@ const FaceLoginAdvanced = ({ onLogin }) => {
   );
 };
 
-export default FaceLoginAdvanced;
+export default FaceLogin;

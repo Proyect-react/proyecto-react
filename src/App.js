@@ -4,7 +4,8 @@ import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Graficos from "./components/Graficos/Graficos";
 import Predicciones from "./components/Predicciones/Predicciones";
-import FaceLoginAdvanced from "./components/Login/FaceLoginAdvanced";
+import FaceLogin from "./components/Login/FaceLoginAdvanced";
+import FaceRegister from "./components/Login/FaceRegisterAdvanced";
 import { AuthProvider } from "./components/AuthWrapper/AuthWrapper";
 import "./App.css";
 
@@ -47,7 +48,15 @@ function App() {
               element={
                 isAuthenticated
                   ? <Navigate to="/dashboard" />
-                  : <FaceLoginAdvanced onLogin={handleLogin} />
+                  : <FaceLogin onLogin={handleLogin} />
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                isAuthenticated
+                  ? <Navigate to="/dashboard" />
+                  : <FaceRegister />
               }
             />
             <Route
