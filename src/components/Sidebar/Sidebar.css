@@ -4,12 +4,15 @@
   top: 0;
   width: 220px;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(145deg, #3777bbcb, #095190ab, #001a21b4); /* fondo profundo y elegante */
+  color: #e0f2ff; /* texto claro para contraste */
   z-index: 1000;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px); /* sutil efecto de profundidad */
 }
 
+/* === HEADER DEL SIDEBAR === */
 .sidebar-header {
   padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -18,10 +21,13 @@
 .sidebar-header h2 {
   margin: 0;
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
+  color: #ffffff; /* acento azul vibrante */
+  letter-spacing: 0.5px;
 }
 
+/* === NAVEGACIÓN === */
 .sidebar-nav {
   padding: 1rem 0;
 }
@@ -33,45 +39,50 @@
   padding: 1rem 1.5rem;
   background: none;
   border: none;
-  color: white;
+  color: #e0f2ff;
   text-align: left;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.95rem;
+  border-left: 3px solid transparent;
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
+  border-left: 3px solid #00c8ff;
 }
 
 .nav-item.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-right: 3px solid #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #00c8ff;
   font-weight: 600;
 }
 
+/* === ICONOS Y ETIQUETAS === */
 .nav-icon {
   margin-right: 0.75rem;
   font-size: 1.1rem;
+  color: #00c8ff;
 }
 
 .nav-label {
   font-weight: 500;
 }
 
-/* Responsive */
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
   .sidebar {
     width: 200px;
   }
-  
+
   .sidebar-header h2 {
     font-size: 1rem;
   }
-  
+
   .nav-item {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
   }
 }
+

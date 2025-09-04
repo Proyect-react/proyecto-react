@@ -151,6 +151,7 @@ const Graficos = ({ onLogout }) => {
       });
     }
   };
+  
 
   // Datos para los gráficos y estadísticas (usa categoryFilter, yearFilter, monthFilter, paymentFilter para filtrar)
   const datosParaCalculos = ventas.filter(v => {
@@ -235,7 +236,7 @@ const Graficos = ({ onLogout }) => {
     datasets: [
       {
         data: chartValues,
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9900', '#00CC99', '#FF6666'],
+        backgroundColor: ['#e78da0ff', '#486ec0ff', '#ead398ff', '#10c07fff', '#8676a7ff', '#7e6d54ff', '#00d8a2ff', '#e23434ff'],
         borderWidth: 0,
       },
     ],
@@ -269,19 +270,20 @@ const Graficos = ({ onLogout }) => {
       label: metodo,
       data: pagoData[metodo],
       fill: false,
-      borderColor: ['#36A2EB','#FF6384','#4BC0C0','#9966FF', '#FF9900', '#00CC99', '#FF6666'][idx % 6],
+     backgroundColor: ['#6194a0ff', '#e49898ff', '#fee8a1ff', '#6a9b7cff', '#b5a6e1ff', '#e8d6dfff', '#4eafd8b1', '#886750ff'],
+
       tension: 0.1,
     })),
   };
   const lineOptions = {
     plugins: {
-      legend: { position: 'bottom', labels: { boxWidth: 15, padding: 15, color: '#ffffff' } },
+      legend: { position: 'bottom', labels: { boxWidth: 15, padding: 15, color: '#ffffffff' } },
     },
     scales: {
       y: { 
         beginAtZero: true, 
         ticks: { color: '#ffffff' },
-        grid: { color: 'rgba(255, 255, 255, 0.2)' }
+        grid: { color: 'rgba(20, 19, 19, 0.4)' }
       },
       x: { 
         ticks: { color: '#ffffff' },
@@ -316,8 +318,8 @@ const Graficos = ({ onLogout }) => {
       {
         label: 'Ventas Mensuales',
         data: ventasPorMes,
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(38, 123, 123, 0.6)',
+        borderColor: 'rgba(107, 231, 231, 1)',
         borderWidth: 1,
       },
     ],
@@ -358,7 +360,7 @@ const Graficos = ({ onLogout }) => {
     datasets: [
       {
         data: sortedProducts.map(([, quantity]) => quantity),
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+        backgroundColor: ['#f79e9ec3', '#64a9d6c5', '#e8cb809f', '#2620d4ff', '#413b4dff'],
         borderWidth: 0,
       },
     ],
@@ -373,6 +375,38 @@ const Graficos = ({ onLogout }) => {
     maintainAspectRatio: false,
     responsive: true,
   };
+
+  // ---- Últimos 5 productos comprados ----
+  // Ordenar por fecha descendente (más reciente primero)
+  // Si hay empate en fecha, mantener el orden original del archivo
+  // Se asume que el campo 'Fecha' es formato DD/MM/YYYY
+  function parseFecha(fechaStr) {
+    if (!fechaStr) return null;
+    const [dd, mm, yyyy] = fechaStr.split('/');
+    if (!dd || !mm || !yyyy) return null;
+    // Date: año, mes (0-based), día
+    return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  }
+
+  // Filtrar ventas con producto y fecha válidos
+  const ventasConProductoYFecha = datosParaCalculos
+    .filter(v => v.Producto && v.Fecha)
+    .map((v, idx) => ({
+      ...v,
+      _parsedFecha: parseFecha(v.Fecha),
+      _originalIdx: idx,
+    }))
+    .filter(v => v._parsedFecha instanceof Date && !isNaN(v._parsedFecha));
+
+  // Ordenar por fecha descendente, luego por índice original para mantener orden estable
+  ventasConProductoYFecha.sort((a, b) => {
+    if (b._parsedFecha - a._parsedFecha !== 0) {
+      return b._parsedFecha - a._parsedFecha;
+    }
+    return a._originalIdx - b._originalIdx;
+  });
+
+  const ultimos5Productos = ventasConProductoYFecha.slice(0, 5);
 
   // Opciones de meses para el filtro
   const monthOptions = [
@@ -395,76 +429,74 @@ const Graficos = ({ onLogout }) => {
     <div className="dashboard-layout">
       <Sidebar />
       <div className="main-content">
-        <header className="dashboard-header">
+        <header className="dashboard-header graficos-header">
           {/* Título eliminado, más filtros agregados */}
-          <div className="header-filters" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', flex: 1 }}>
-            <div className="search-container">
-              <select
-                value={categorySearchTerm}
-                onChange={handleSearchTermChange}
-                className="search-select"
-              >
-                <option value="">Todas las categorías</option>
-                {availableCategories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-              <span className="search-icon">🔍</span>
-            </div>
-            <div className="filter-container">
-              <select
-                value={yearFilter}
-                onChange={handleYearChange}
-                className="search-select"
-              >
-                <option value="">Todos los años</option>
-                {availableYears
-                  .sort((a, b) => b - a)
-                  .map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-              </select>
-            </div>
-            <div className="filter-container">
-              <select
-                value={monthFilter}
-                onChange={handleMonthChange}
-                className="search-select"
-              >
-                {monthOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="filter-container">
-              <select
-                value={paymentFilter}
-                onChange={handlePaymentChange}
-                className="search-select"
-              >
-                <option value="">Todos los métodos de pago</option>
-                {availablePayments.map(payment => (
-                  <option key={payment} value={payment}>{payment}</option>
-                ))}
-              </select>
-            </div>
-            <div className="file-upload-container">
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
-                className="file-input"
-                id="file-input"
-              />
-              <label htmlFor="file-input" className="file-upload-label">
-                Subir CSV
-              </label>
-            </div>
-            <button onClick={onLogout} className="logout-btn">Cerrar Sesión</button>
+          <div className="search-container">
+            <select
+              value={categorySearchTerm}
+              onChange={handleSearchTermChange}
+              className="search-select"
+            >
+              <option value="">Todas las categorías</option>
+              {availableCategories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+            <span className="search-icon">🔍</span>
           </div>
+          <div className="filter-container">
+            <select
+              value={yearFilter}
+              onChange={handleYearChange}
+              className="search-select"
+            >
+              <option value="">Todos los años</option>
+              {availableYears
+                .sort((a, b) => b - a)
+                .map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+            </select>
+          </div>
+          <div className="filter-container">
+            <select
+              value={monthFilter}
+              onChange={handleMonthChange}
+              className="search-select"
+            >
+              {monthOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="filter-container">
+            <select
+              value={paymentFilter}
+              onChange={handlePaymentChange}
+              className="search-select"
+            >
+              <option value="">Todos los métodos de pago</option>
+              {availablePayments.map(payment => (
+                <option key={payment} value={payment}>{payment}</option>
+              ))}
+            </select>
+          </div>
+          <div className="file-upload-container">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
+              className="file-input"
+              id="file-input"
+            />
+            <label htmlFor="file-input" className="file-upload-label">
+              Subir CSV
+            </label>
+          </div>
+          <button onClick={onLogout} className="logout-btn">Cerrar Sesión</button>
         </header>
 
-        <div className="dashboard-content">
+        <div className="dashboard-content graficos-content">
           <div className="stats-charts-container">
             <div className="stats-grid">
               <div className="stat-card">
@@ -488,6 +520,7 @@ const Graficos = ({ onLogout }) => {
                 <p className="stat-value">{margenDeGanancia.toFixed(2)}%</p>
               </div>
             </div>
+
             <div className="charts-grid">
               <div className="chart-card">
                 <h2>{doughnutChartTitle}</h2>
@@ -529,6 +562,42 @@ const Graficos = ({ onLogout }) => {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+          {/* Tabla de los últimos 5 productos comprados - AHORA ABAJO DE LOS GRÁFICOS */}
+          <div className="ultimos-productos-table-container">
+            <h2 className="ultimos-productos-title">Últimos 5 productos comprados</h2>
+            <div className="ultimos-productos-table-scroll">
+              <table className="ultimos-productos-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Categoría</th>
+                    <th>Total</th>
+                    <th>Método de Pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ultimos5Productos.length > 0 ? (
+                    ultimos5Productos.map((v, idx) => (
+                      <tr key={idx}>
+                        <td>{v.Fecha}</td>
+                        <td>{v.Producto}</td>
+                        <td>{v.Cantidad}</td>
+                        <td>{v.Categoría}</td>
+                        <td>{v.Total?.toFixed ? `S/${v.Total.toFixed(2)}` : v.Total}</td>
+                        <td>{v.Pago}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '1rem' }}>No hay productos recientes para mostrar.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
