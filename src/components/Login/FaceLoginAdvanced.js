@@ -17,13 +17,45 @@ const FaceLogin = ({ onLogin }) => {
   const yaDijoBienvenido = useRef(""); // Para evitar repetir la voz de bienvenida
   const navigate = useNavigate();
 
-  // Función para hablar usando SpeechSynthesis
+  // Función para hablar usando SpeechSynthesis con voz menos robótica
   const speak = (texto) => {
     if ('speechSynthesis' in window) {
+      const synth = window.speechSynthesis;
+      let voices = synth.getVoices();
+
+      // Buscar una voz española femenina que suene más natural
+      // Si no hay, usar la primera voz española disponible
+      let vozElegida = voices.find(v => v.lang.startsWith("es") && v.name.toLowerCase().includes("female"));
+      if (!vozElegida) {
+        vozElegida = voices.find(v => v.lang.startsWith("es") && v.name.toLowerCase().includes("mujer"));
+      }
+      if (!vozElegida) {
+        vozElegida = voices.find(v => v.lang === "es-ES");
+      }
+      if (!vozElegida) {
+        vozElegida = voices.find(v => v.lang.startsWith("es"));
+      }
+      // Si no hay ninguna voz española, usar la predeterminada
       const utter = new window.SpeechSynthesisUtterance(texto);
       utter.lang = "es-ES";
-      window.speechSynthesis.cancel(); // Detener cualquier voz anterior
-      window.speechSynthesis.speak(utter);
+      if (vozElegida) {
+        utter.voice = vozElegida;
+        // Opcional: ajustar pitch y rate para sonar más natural
+        utter.pitch = 1.1;
+        utter.rate = 0.97;
+      } else {
+        utter.pitch = 1.1;
+        utter.rate = 0.97;
+      }
+      synth.cancel(); // Detener cualquier voz anterior
+      // Algunos navegadores requieren esperar a que se carguen las voces
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          speak(texto);
+        };
+        return;
+      }
+      synth.speak(utter);
     }
   };
 
