@@ -134,7 +134,7 @@ const FaceLogin = ({ onLogin }) => {
     }
 
     if (found) {
-      setMessage(`Usuario detectado: ${foundName} ✅\nRedirigiendo en ${countdown !== null ? countdown : 3} segundos...`);
+      setMessage(`Usuario detectado: ${foundName} ✅`);
       if (detectedUser !== foundName) {
         setDetectedUser(foundName);
         setCountdown(3);
