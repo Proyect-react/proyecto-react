@@ -63,9 +63,8 @@ El proyecto puede ser desplegado en:
 Vercel (Prueba de 14 Dias)
 
 Autor
-
-
-Proyecto desarrollado por el equipo Proyect-react
+  ```bash
+ Proyecto desarrollado por el equipo Proyect-react
 Adrian Miranda
 Carlos Luna
 Eduardo Caballero
