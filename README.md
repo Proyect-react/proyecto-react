@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+# 📊 Proyecto React con Login Facial
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Este proyecto está desarrollado con **React** y combina dos funcionalidades principales:  
+1. 🔐 **Sistema de autenticación con reconocimiento facial** para garantizar mayor seguridad al iniciar sesión.  
+2. 📈 **Dashboard interactivo** para la gestión y visualización de datos mediante gráficos y reportes.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 Características principales
 
-### `npm start`
+- 👤 **Login con reconocimiento facial**: los usuarios pueden registrarse e iniciar sesión utilizando su rostro.  
+- 📊 **Dashboard dinámico**:  
+  - Visualización de métricas en tiempo real.  
+  - Gráficos interactivos para analizar información.  
+  - Reportes de predicciones y estadísticas.  
+- 🎨 **Interfaz moderna y responsiva**, desarrollada con componentes reutilizables de React.  
+- ⚡ **Optimizado** para un despliegue rápido en Vercel, Netlify o GitHub Pages.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ Tecnologías utilizadas
 
-### `npm test`
+- **React** ⚛️ (Create React App)  
+- **JavaScript (ES6+)**  
+- **CSS / Tailwind** (o el sistema de estilos que uses)  
+- **Bibliotecas de gráficos** (ej. Chart.js, Recharts o similar)  
+- **API de reconocimiento facial** (ej. face-api.js, TensorFlow.js, etc.)  
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## ⚙️ Instalación
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clona el repositorio:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   ```bash
+   git clone https://github.com/Proyect-react/proyecto-react.git
+   cd proyecto-react
+Instala las dependencias:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+npm install
 
-### `npm run eject`
+2. Ejecución
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+npm start
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Estructura del proyecto
+proyecto-react/
+├── public/             # Archivos estáticos
+├── src/                
+│   ├── components/     # Componentes de React (Login, Dashboard, Gráficos, etc.)
+│   ├── pages/          # Vistas principales de la aplicación
+│   ├── styles/         # Archivos CSS
+│   ├── App.js          # Componente raíz
+│   └── index.js        # Punto de entrada
+├── package.json        # Dependencias y scripts
+└── README.md           # Documentación
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Despliegue
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+El proyecto puede ser desplegado en:
 
-## Learn More
+Vercel (Prueba de 14 Dias)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Autor
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Proyecto desarrollado por el equipo Proyect-react
+Adrian Miranda
+Carlos Luna
+Eduardo Caballero
+Miguel Quijano
+Luis Reyes
+Silvia Castro
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Repositorio: proyecto-react
