@@ -199,7 +199,7 @@ const FaceRegister = () => {
               autoComplete="off"
             />
             {/* Ya no hay botón de registrar, el registro es automático */}
-            <p style={{ marginTop: "16px", fontSize: "14px" }}>
+            <p style={{ marginTop: "16px", fontSize: "14px", color: "black"}}>
               ¿Ya tienes cuenta? <a href="/" style={{ color: "#4CAF50" }}>Inicia sesión aquí</a>
             </p>
           </div>
