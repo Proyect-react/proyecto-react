@@ -27,7 +27,6 @@ Este proyecto está desarrollado con **React** y combina dos funcionalidades pri
 - **API de reconocimiento facial** (ej. face-api.js, TensorFlow.js, etc.)  
 
 ---
-
 ## ⚙️ Instalación
 
 1. Clona el repositorio:
