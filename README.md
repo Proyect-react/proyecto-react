@@ -36,23 +36,24 @@ Este proyecto está desarrollado con **React** y combina dos funcionalidades pri
    cd proyecto-react
 Instala las dependencias:
 
-npm install
+    npm install
 
 2. Ejecución
 
 npm start
 
-Estructura del proyecto
-proyecto-react/
-├── public/             # Archivos estáticos
-├── src/                
-│   ├── components/     # Componentes de React (Login, Dashboard, Gráficos, etc.)
-│   ├── pages/          # Vistas principales de la aplicación
-│   ├── styles/         # Archivos CSS
-│   ├── App.js          # Componente raíz
-│   └── index.js        # Punto de entrada
-├── package.json        # Dependencias y scripts
-└── README.md           # Documentación
+    ```bash
+    Estructura del proyecto
+    proyecto-react/
+    ├── public/             # Archivos estáticos
+    ├── src/                
+    │   ├── components/     # Componentes de React (Login, Dashboard, Gráficos, etc.)
+    │   ├── pages/          # Vistas principales de la aplicación
+    │   ├── styles/         # Archivos CSS
+    │   ├── App.js          # Componente raíz
+    │   └── index.js        # Punto de entrada
+    ├── package.json        # Dependencias y scripts
+    └── README.md           # Documentación
 
 Despliegue
 
