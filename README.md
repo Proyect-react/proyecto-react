@@ -63,6 +63,7 @@ Vercel (Prueba de 14 Dias)
 
 Autor
 
+
 Proyecto desarrollado por el equipo Proyect-react
 Adrian Miranda
 Carlos Luna
