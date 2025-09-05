@@ -18,6 +18,8 @@
   font-weight: 500;
   max-width: 100vw;
   box-sizing: border-box;
+  z-index: 1; /* CORRECCIÓN: Aseguramos que los filtros tengan un z-index bajo */
+  position: relative;
 }
 
 .search-select:focus,
@@ -43,6 +45,7 @@
   box-sizing: border-box;
   gap: 0.5em;
   overflow-x: auto;
+  z-index: 1; /* CORRECCIÓN: Aseguramos un z-index bajo */
 }
 
 .search-icon {
@@ -53,6 +56,7 @@
   font-size: 1.1em;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2; /* Un valor un poco más alto que el contenedor, pero bajo en general */
 }
 
 /* Ajuste para el contenedor de filtros en pantallas pequeñas */
@@ -62,6 +66,7 @@
     gap: 0.5em;
     width: 100%;
     overflow-x: auto;
+    z-index: 1;
   }
   .search-select,
   .filter-container select {
@@ -70,6 +75,7 @@
     margin-bottom: 0.5em;
     margin-right: 0.5em;
     max-width: 100%;
+    z-index: 1;
   }
 }
 
@@ -80,6 +86,7 @@
     gap: 0.5em;
     width: 100%;
     overflow-x: auto;
+    z-index: 1;
   }
   .search-select,
   .filter-container select {
@@ -89,6 +96,7 @@
     margin-bottom: 0.5em;
     font-size: 0.95em;
     box-sizing: border-box;
+    z-index: 1;
   }
 }
 
@@ -100,6 +108,9 @@
   gap: 18px;
   align-items: center;
   box-sizing: border-box;
+  z-index: 2; /* CORRECCIÓN: Un z-index más alto para las tarjetas */
+  position: relative;
+  margin-top: 300px; /* NUEVO CAMBIO: Agregamos un margen superior para bajar las tarjetas */
 }
 
 .stats-charts-container h2 {
@@ -112,16 +123,18 @@
 
 /* Cuadrícula para las tarjetas de estadísticas */
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex; /* CAMBIO: usar flexbox */
+  flex-wrap: wrap; /* CAMBIO: permitir que los elementos se envuelvan a la siguiente línea */
   gap: 16px;
   width: 100%;
   max-width: 1200px;
   justify-content: center;
   box-sizing: border-box;
-  overflow-x: auto;
+  overflow-x: auto; /* MANTENIENDO el overflow-x */
   scrollbar-width: thin;
   scrollbar-color: #81e6d9 #23272f;
+  z-index: 2; /* Aseguramos que las tarjetas estén en un plano superior */
+  position: relative;
 }
 
 .stats-grid::-webkit-scrollbar {
@@ -137,39 +150,31 @@
 /* Cuadrícula para los gráficos principales */
 .charts-grid {
   display: grid;
-  grid-template-areas: 
-    "productos-mas-vendidos metodo-pago"
-    "productos-mas-vendidos ventas-mensuales";
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr; /* MANTENIENDO el layout de 2 columnas para pantallas grandes */
+  grid-template-rows: auto auto; /* CAMBIO: usar 'auto' para que las filas se ajusten al contenido */
   gap: 16px;
   width: 100%;
   max-width: 1200px;
   box-sizing: border-box;
-  overflow-x: auto;
+  overflow-x: auto; /* MANTENIENDO el overflow-x */
   scrollbar-width: thin;
   scrollbar-color: #81e6d9 #23272f;
+  z-index: 2; /* Aseguramos que las tarjetas estén en un plano superior */
+  position: relative;
 }
 
-.charts-grid::-webkit-scrollbar {
-  height: 8px;
-  background: #23272f;
-  border-radius: 8px;
+/* Asignar áreas a cada tarjeta de gráfico solo en pantallas grandes */
+.chart-card.doughnut-chart {
+  grid-area: doughnut-chart; /* NUEVO: agregar una clase para el gráfico de rosquilla */
 }
-.charts-grid::-webkit-scrollbar-thumb {
-  background: #81e6d9;
-  border-radius: 8px;
+.chart-card.line-chart {
+  grid-area: line-chart; /* NUEVO: agregar una clase para el gráfico de línea */
 }
-
-/* Asignar áreas a cada tarjeta de gráfico */
-.chart-card.productos-mas-vendidos {
-  grid-area: productos-mas-vendidos;
+.chart-card.bar-chart {
+  grid-area: bar-chart; /* NUEVO: agregar una clase para el gráfico de barras */
 }
-.chart-card.metodo-pago {
-  grid-area: metodo-pago;
-}
-.chart-card.ventas-mensuales {
-  grid-area: ventas-mensuales;
+.chart-card.pie-chart {
+  grid-area: pie-chart; /* NUEVO: agregar una clase para el gráfico de pastel */
 }
 
 /* Tarjetas de estadísticas y gráficos */
@@ -187,7 +192,18 @@
   color: #e0e7ff;
   min-width: 0;
   box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+  z-index: 2; /* CORRECCIÓN: Un z-index más alto para las tarjetas */
+  position: relative;
+  flex: 1 1 200px; /* CAMBIO: flex-grow, flex-shrink y flex-basis para las tarjetas */
 }
+/* Estilos para las tarjetas de gráficos */
+.chart-card {
+  min-width: 300px;
+  flex: 1 1 45%; /* CAMBIO: las tarjetas de gráfico deben ser más grandes */
+}
+
 
 .stat-card h3,
 .chart-card h2 {
@@ -394,6 +410,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   max-height: calc(100vh - 180px);
+  position: relative;
+  z-index: 0;
 }
 
 /* Header de gráficos con scroll horizontal para filtros */
@@ -409,6 +427,9 @@
   width: 75%;
   max-width: 100vw;
   box-sizing: border-box;
+  z-index: 1; /* CORRECCIÓN: Reduce el z-index a 1 */
+  position: relative;
+  background: transparent;
 }
 
 .dashboard-header.graficos-header::-webkit-scrollbar {
@@ -429,23 +450,31 @@
 .dashboard-header.graficos-header .logout-btn {
   flex: 0 0 auto;
   margin-right: 0; /* Nada de márgenes extra */
+  z-index: 1; /* CORRECCIÓN: Se asegura que el z-index sea 1 */
+  position: relative;
 }
 
 /* Asegurar que los selects no se desborden */
 .dashboard-header.graficos-header .search-select {
   min-width: 160px;
   max-width: 200px;
+  z-index: 1; /* CORRECCIÓN: Se asegura que el z-index sea 1 */
+  position: relative;
 }
 
 /* Botón de cerrar sesión */
 .dashboard-header.graficos-header .logout-btn {
   white-space: nowrap;
   margin-left: 0;
+  z-index: 1; /* CORRECCIÓN: Se asegura que el z-index sea 1 */
+  position: relative;
 }
 
 /* Botón de subir archivo */
 .dashboard-header.graficos-header .file-upload-container {
   margin-left: 0;
+  z-index: 1; /* CORRECCIÓN: Se asegura que el z-index sea 1 */
+  position: relative;
 }
 
 /* Ajustes responsivos */
@@ -479,5 +508,54 @@
   .logout-btn {
     font-size: 0.85em;
     padding: 5px 8px;
+  }
+}
+
+/* RESPONSIVE: Asegura que las tarjetas estadísticas no se desborden en pantallas pequeñas */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    max-width: 100vw;
+  }
+}
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    max-width: 100vw;
+    gap: 12px;
+  }
+  .stat-card, .chart-card {
+    padding: 14px 8px;
+    font-size: 0.97em;
+  }
+  
+  /* CAMBIO: para pantallas medianas, que los gráficos se pongan uno debajo del otro */
+  .charts-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: none; /* CAMBIO: Eliminar grid-template-areas */
+    grid-template-rows: auto;
+    max-width: 100vw;
+  }
+}
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    max-width: 100vw;
+    gap: 10px;
+  }
+  .stat-card, .chart-card {
+    padding: 10px 4px;
+    font-size: 0.95em;
+    min-width: 0;
+    width: 100%;
+    max-width: 100vw;
+  }
+  
+  /* CAMBIO: para móviles, que los gráficos se pongan uno debajo del otro */
+  .charts-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: none; /* CAMBIO: Eliminar grid-template-areas */
+    grid-template-rows: auto;
+    max-width: 100vw;
   }
 }
