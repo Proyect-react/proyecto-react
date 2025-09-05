@@ -15,6 +15,12 @@ const FaceRegister = () => {
   const yaDijoNombreRegistrado = useRef(false);
   const navigate = useNavigate();
 
+  // Nuevo: Verificar si ya inició sesión
+  const [yaLogueado, setYaLogueado] = useState(() => {
+    // Checar tanto sessionStorage como localStorage por si acaso
+    return sessionStorage.getItem("faceLoggedIn") === "true" || localStorage.getItem("isAuthenticated") === "true";
+  });
+
   // Función para hablar usando SpeechSynthesis
   const speak = (texto) => {
     if ('speechSynthesis' in window) {
@@ -60,6 +66,9 @@ const FaceRegister = () => {
 
   // Detectar rostro y, si es válido y hay nombre, registrar automáticamente
   const detectAndRegister = async () => {
+    // Si ya está logueado, no hacer nada (ni mostrar mensajes de error)
+    if (yaLogueado) return;
+
     if (!videoRef.current) return;
     const detections = await faceapi
       .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
@@ -98,9 +107,9 @@ const FaceRegister = () => {
     }
 
     if (found) {
-      setMessage("Usuario ya registrado ❌");
+      setMessage("Rostro ya registrado ❌");
       if (!yaDijoRostroRegistrado.current) {
-        speak("Usuario ya registrado");
+        speak("Este rostro ya está registrado");
         yaDijoRostroRegistrado.current = true;
       }
       yaIntentoRegistrar.current = false;
@@ -115,9 +124,9 @@ const FaceRegister = () => {
       yaIntentoRegistrar.current = true;
       // Verificar si el nombre ya está registrado
       if (users[inputName]) {
-        setMessage("Usuario ya registrado ❌");
+        setMessage("Ese nombre ya está registrado ❌");
         if (!yaDijoNombreRegistrado.current) {
-          speak("Usuario ya registrado");
+          speak("Ese nombre ya está registrado");
           yaDijoNombreRegistrado.current = true;
         }
         return;
@@ -140,9 +149,33 @@ const FaceRegister = () => {
 
   // Loop de detección cada 1 segundo
   useEffect(() => {
+    // Si ya está logueado, no hacer nada
+    if (yaLogueado) return;
     const interval = setInterval(detectAndRegister, 1000);
     return () => clearInterval(interval);
-  }, [users, prevEyeDistance, inputName]);
+  }, [users, prevEyeDistance, inputName, yaLogueado]);
+
+  // Si ya está logueado, mostrar mensaje y no permitir registro ni mensajes de error
+  if (yaLogueado) {
+    return (
+      <div className="face-login-container">
+        <div className="face-login-main-content">
+          <video ref={videoRef} autoPlay muted className="face-login-video" />
+          <div className="face-login-side-panel">
+            <h1 className="face-login-title">Registro Facial</h1>
+            <p className="face-login-message">
+              Ya has iniciado sesión. No es necesario registrarte de nuevo.
+            </p>
+            <div className="face-login-input-group">
+              <p style={{ marginTop: "16px", fontSize: "14px" }}>
+                ¿Quieres ir al panel? <a href="/dashboard" style={{ color: "#4CAF50" }}>Ir al dashboard</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="face-login-container">
@@ -165,7 +198,7 @@ const FaceRegister = () => {
               }}
               autoComplete="off"
             />
-            {/* Ya no hay botón de registrar */}
+            {/* Ya no hay botón de registrar, el registro es automático */}
             <p style={{ marginTop: "16px", fontSize: "14px" }}>
               ¿Ya tienes cuenta? <a href="/" style={{ color: "#4CAF50" }}>Inicia sesión aquí</a>
             </p>
